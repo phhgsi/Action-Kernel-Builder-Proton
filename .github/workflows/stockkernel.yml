@@ -10,15 +10,15 @@ on:
       KERNEL_TREE:
         description: 'Kernel tree URL'
         required: true
-        default: 'https://github.com/cd-Crypton/android_kernel_realme_sm6225'
+        default: 'https://github.com/phhgsi/stock_kernel_oneplus_sm6375.git'
       KERNEL_BRANCH:
         description: 'Kernel tree Branch'
         required: true
-        default: 'android13-staging'
+        default: 'wip'
       KERNEL_DEFCONFIG:
         description: 'Kernel defconfig'
         required: true
-        default: 'vendor/bengal-perf_defconfig'
+        default: 'vendor/holi-qgki_defconfig'
       KERNEL_IMAGE_NAME:
         description: 'Kernel image name'
         required: true
@@ -48,9 +48,9 @@ jobs:
 
     - name: Clone Kernel Tree
       run: |
-        git clone https://github.com/phhgsi/android_kernel_modules_and_devicetree_oneplus_sm6375.git ./android/kernel
-        cd android/kernel
-        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./sm6375
+        git clone https://github.com/phhgsi/android_kernel_modules_and_devicetree_oneplus_sm6375.git ./android/module
+        cd android/module
+        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./kernel
 
     - name: Set Properties
       run: |
