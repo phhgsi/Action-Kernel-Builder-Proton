@@ -64,7 +64,7 @@ jobs:
     - name: Build Kernel
       run: |
         PATH="${GITHUB_WORKSPACE}/android/toolchains/proton-clang/bin:/bin:$PATH"
-        cd android/kernel/sm6375
+        cd android/kernel/kernel/msm-5.4
         ${{ env.MAKE }} ${{ env.ADD }} ${{ github.event.inputs.KERNEL_DEFCONFIG }}
         ${{ env.MAKE }} ${{ env.ADD }} -j"$(nproc --all)"
 
