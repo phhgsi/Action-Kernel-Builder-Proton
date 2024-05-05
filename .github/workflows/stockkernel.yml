@@ -48,9 +48,12 @@ jobs:
 
     - name: Clone Kernel Tree
       run: |
-        git clone https://github.com/phhgsi/android_kernel_modules_and_devicetree_oneplus_sm6375.git ./android/module
-        cd android/module
-        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./kernel
+        git clone https://github.com/phhgsi/android_kernel_modules_and_devicetree_oneplus_sm6375.git ./android/kernel
+        cd android/kernel
+        rm -rf kernel/msm-5.4
+        mkdir -p kernel
+        cd kernel
+        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./msm-5.4
 
     - name: Set Properties
       run: |
