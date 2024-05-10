@@ -1,4 +1,4 @@
-name: Build stock Kernel
+name: Build Kernel
 
 on:
   workflow_dispatch:
@@ -10,15 +10,19 @@ on:
       KERNEL_TREE:
         description: 'Kernel tree URL'
         required: true
-        default: 'https://github.com/phhgsi/stock_kernel_oneplus_sm6375.git'
+        default: 'https://github.com/cd-Crypton/android_kernel_realme_sm6225'
       KERNEL_BRANCH:
         description: 'Kernel tree Branch'
         required: true
-        default: 'wip'
+        default: 'android13-staging'
+      KERNEL_DIR:
+        description: 'Kernel Directory'
+        required: true
+        default: 'kernel/msm-5.4'
       KERNEL_DEFCONFIG:
         description: 'Kernel defconfig'
         required: true
-        default: 'vendor/holi-qgki_defconfig'
+        default: 'vendor/bengal-perf_defconfig'
       KERNEL_IMAGE_NAME:
         description: 'Kernel image name'
         required: true
@@ -48,12 +52,8 @@ jobs:
 
     - name: Clone Kernel Tree
       run: |
-        git clone https://github.com/phhgsi/android_kernel_modules_and_devicetree_oneplus_sm6375.git ./android/kernel
-        cd android/kernel
-        rm -rf kernel/msm-5.4
-        mkdir -p kernel
-        cd kernel
-        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./msm-5.4
+        cd android
+        git clone --depth=1 ${{ github.event.inputs.KERNEL_TREE }} -b ${{ github.event.inputs.KERNEL_BRANCH }} ./kernel
 
     - name: Set Properties
       run: |
@@ -64,7 +64,7 @@ jobs:
     - name: Build Kernel
       run: |
         PATH="${GITHUB_WORKSPACE}/android/toolchains/proton-clang/bin:/bin:$PATH"
-        cd android/kernel/kernel/msm-5.4
+        cd android/kernel/${{ github.event.inputs.KERNEL_DIR }}
         ${{ env.MAKE }} ${{ env.ADD }} ${{ github.event.inputs.KERNEL_DEFCONFIG }}
         ${{ env.MAKE }} ${{ env.ADD }} -j"$(nproc --all)"
 
@@ -73,7 +73,7 @@ jobs:
         cd android
         if [ -f kernel/out/arch/arm64/boot/${{ github.event.inputs.KERNEL_IMAGE_NAME }} ]; then
             echo "KERNEL_IS_OK=true" >> $GITHUB_ENV
-            echo "KERNEL_VERSION=$(cat kernel/out/include/config/kernel.release)" >> $GITHUB_ENV
+            echo "KERNEL_VERSION=$(cat kernel/kernel/msm-5.4/out/include/config/kernel.release)" >> $GITHUB_ENV
         else
             echo "Kernel out directory is empty. Maybe(?) your name input did not exist at all. Try other kernel name."
             exit 1
@@ -84,7 +84,7 @@ jobs:
       run: |
         cd android
         git clone --depth=1 https://github.com/cd-Crypton/AnyKernel3.git -b FOR-ALL
-        cd kernel/out/arch/arm64/boot && cp -r ${{ github.event.inputs.KERNEL_IMAGE_NAME }} ${GITHUB_WORKSPACE}/android/AnyKernel3
+        cd kernel/kernel/msm-5.4/out/arch/arm64/boot && cp -r ${{ github.event.inputs.KERNEL_IMAGE_NAME }} ${GITHUB_WORKSPACE}/android/AnyKernel3
         cd ${GITHUB_WORKSPACE}/android/AnyKernel3
         zip -r9 UPDATE-AnyKernel3-${{ env.BUILD_DATE }}.zip * -x .git README.md *placeholder
 
@@ -93,7 +93,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          android/kernel/out/arch/arm64/boot/${{ github.event.inputs.KERNEL_IMAGE_NAME }}
+          android/kernel/kernel/msm-5.4/out/arch/arm64/boot/${{ github.event.inputs.KERNEL_IMAGE_NAME }}
           android/AnyKernel3/UPDATE-AnyKernel3-${{ env.BUILD_DATE }}.zip
         name: Proton Kernel Build | ${{ env.KERNEL_VERSION }} | ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
